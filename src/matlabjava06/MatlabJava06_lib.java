@@ -39,18 +39,20 @@ public class MatlabJava06_lib {
 	
 	//https://jp.mathworks.com/help/stats/fitlm.html
 	//https://jp.mathworks.com/help/stats/linearmodel-class.html
+	//https://jp.mathworks.com/help/stats/robust-regression-reduce-outlier-effects.html
 	//6列目:世帯数、5列目:80over
 	public double[][] getRegression() {
 		double [][]result = new double[3][2]; //係数Estimate,pValue,決定係数[2][0],自由度調整済み決定係数[2][1], 今回は２変数
 		try {
 			ml.eval("x = table(data(:,6),data(:,5));");
-			ml.eval("mdl = fitlm(x)");
+			//ml.eval("mdl = fitlm(x)");
+			//ml.eval("mdl = fitlm(x,'quadratic')"); //２次の項まで(係数は切片,x,x^2)
+			ml.eval("mdl = fitlm(x,'quadratic','RobustOpts','on')");
 			ml.eval("Coefficients = mdl.Coefficients");
 			ml.eval("Estimate = mdl.Coefficients.Estimate");
 			ml.eval("pValue = mdl.Coefficients.pValue");
 			ml.eval("Ordinary = mdl.Rsquared.Ordinary");
 			ml.eval("Adjusted = mdl.Rsquared.Adjusted");
-			//Future<double[]> futureEval_x = ml.getVariableAsync("Coefficients");
 			Future<double[]> futureEval_x0 = ml.getVariableAsync("Estimate");
 			result[0] = futureEval_x0.get();
 			Future<double[]> futureEval_x1 = ml.getVariableAsync("pValue");
@@ -63,7 +65,7 @@ public class MatlabJava06_lib {
 			ml.eval("yPred = predict(mdl,data(:,6));");
 			ml.eval("plot(data(:,6),data(:,5),'.');");
 			ml.eval("hold on");
-			ml.eval("plot(data(:,6), yPred, '.-');");
+			ml.eval("plot(data(:,6), yPred, '.');");
 			ml.eval("legend('All Data','Predicted Response');");
 			ml.eval("xlabel('Number of House');");
 			ml.eval("ylabel('Population of 80 over');");
@@ -71,7 +73,9 @@ public class MatlabJava06_lib {
 			ml.eval("pause(5);");
 			ml.eval("saveas(gcf,'regression.png')");
 			ml.eval("hold off");
-			
+			Future<double[]> futureEval_y = ml.getVariableAsync("yPred");
+			double [] ypred = futureEval_y.get();
+			getEvaluateFit(data[5], ypred, "Regression");
 		} catch (MatlabExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -98,13 +102,14 @@ public class MatlabJava06_lib {
 		double [][]result = new double[3][3]; //係数Estimate,pValue,決定係数[2][0],自由度調整済み決定係数[2][1], 今回は２変数
 		try {
 			ml.eval("x = table(data(:,6),data(:,1),data(:,5));");
-			ml.eval("mdl = fitlm(x)");
+			//ml.eval("mdl = fitlm(x)");
+			//ml.eval("mdl = fitlm(x,'quadratic')"); //２次の項まで(係数は切片,x,x^2)
+			ml.eval("mdl = fitlm(x,'quadratic','RobustOpts','on')");
 			ml.eval("Coefficients = mdl.Coefficients");
 			ml.eval("Estimate = mdl.Coefficients.Estimate");
 			ml.eval("pValue = mdl.Coefficients.pValue");
 			ml.eval("Ordinary = mdl.Rsquared.Ordinary");
 			ml.eval("Adjusted = mdl.Rsquared.Adjusted");
-			//Future<double[]> futureEval_x = ml.getVariableAsync("Coefficients");
 			Future<double[]> futureEval_x0 = ml.getVariableAsync("Estimate");
 			result[0] = futureEval_x0.get();
 			Future<double[]> futureEval_x1 = ml.getVariableAsync("pValue");
@@ -146,5 +151,42 @@ public class MatlabJava06_lib {
 			e.printStackTrace();
 		}
 		return result;
+	}
+	
+	public void getEvaluateFit(double []y, double []ypred, String name) {
+		try {
+			ml.putVariableAsync("y", y);
+			ml.putVariableAsync("ypred", ypred);
+			ml.putVariableAsync("name", name);
+			ml.eval("subplot(2,2,1)");
+			ml.eval("plot(data(:,5),'.')");
+			ml.eval("hold on");
+			ml.eval("plot(ypred,'.')");
+			ml.eval("hold off");
+			ml.eval("title(name)");
+			ml.eval("xlabel('Observation number')");
+			ml.eval("ylabel('Y value')");
+			ml.eval("pause(5);");
+			ml.eval("clf");
+		} catch (MatlabExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MatlabSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CancellationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (EngineException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
 	}
 }
