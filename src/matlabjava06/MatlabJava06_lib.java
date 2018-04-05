@@ -158,6 +158,8 @@ public class MatlabJava06_lib {
 			ml.putVariableAsync("y", y);
 			ml.putVariableAsync("ypred", ypred);
 			ml.putVariableAsync("name", name);
+			
+			//Plot of the actual values (in blue) and the predicted values (in red) against the observation number.
 			ml.eval("subplot(2,2,1)");
 			ml.eval("plot(data(:,5),'.')");
 			ml.eval("hold on");
@@ -166,7 +168,36 @@ public class MatlabJava06_lib {
 			ml.eval("title(name)");
 			ml.eval("xlabel('Observation number')");
 			ml.eval("ylabel('Y value')");
+			
+			//Plot of the actual value on the x-axis against the predicted value on the y-axis.
+			ml.eval("subplot(2,2,2)");
+			ml.eval("scatter(data(:,5),ypred,'.')");
+			ml.eval("xl = xlim;");
+			ml.eval("hold on");
+			ml.eval("plot(xl,xl,'k:')");
+			ml.eval("hold off");
+			ml.eval("title(name)");
+			ml.eval("xlabel('Actual value')");
+			ml.eval("ylabel('Predicted value')");
+			
+			//Histogram showing the distribution of the errors between the actual and predicted values.
+			ml.eval("subplot(2,2,3)");
+			ml.eval("err = data(:,5) - ypred;");
+			ml.eval("MSE = mean(err.^2,'omitnan');");
+			ml.eval("histogram(err)");
+			ml.eval("title(['MSE = ',num2str(MSE,4)])");
+			ml.eval("xlabel('Prediction error')");
+			
+			//Histogram showing the error as a percentage of the actual value.
+			ml.eval("subplot(2,2,4)");
+			ml.eval("err = 100*err./data(:,5);");
+			ml.eval("MAPE = mean(abs(err),'omitnan');");
+			ml.eval("histogram(err)");
+			ml.eval("title(['MAPE = ',num2str(MAPE,4)])");
+			ml.eval("xlabel('Prediction percentage error')");
+			
 			ml.eval("pause(5);");
+			ml.eval("saveas(gcf,'regressioncheck.png')");
 			ml.eval("clf");
 		} catch (MatlabExecutionException e) {
 			// TODO Auto-generated catch block
