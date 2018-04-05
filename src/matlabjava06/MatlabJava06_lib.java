@@ -153,6 +153,62 @@ public class MatlabJava06_lib {
 		return result;
 	}
 	
+	//https://jp.mathworks.com/help/stats/stepwiselm.html
+	public double[][] getStepwise() {
+		double [][]result = new double[3][5]; //係数Estimate,pValue,決定係数[2][0],自由度調整済み決定係数[2][1], 今回は5変数
+		try {
+			ml.eval("x = table(data(:,1),data(:,2),data(:,3),data(:,4),data(:,6),data(:,5));");
+			ml.eval("mdl = stepwiselm(x)");
+			ml.eval("Coefficients = mdl.Coefficients");
+			ml.eval("Estimate = mdl.Coefficients.Estimate");
+			ml.eval("pValue = mdl.Coefficients.pValue");
+			ml.eval("Ordinary = mdl.Rsquared.Ordinary");
+			ml.eval("Adjusted = mdl.Rsquared.Adjusted");
+			Future<double[]> futureEval_x0 = ml.getVariableAsync("Estimate");
+			result[0] = futureEval_x0.get();
+			Future<double[]> futureEval_x1 = ml.getVariableAsync("pValue");
+			result[1] = futureEval_x1.get();
+			Future<Double> futureEval_x2 = ml.getVariableAsync("Ordinary");
+			result[2][0] = futureEval_x2.get();
+			Future<Double> futureEval_x3 = ml.getVariableAsync("Adjusted");
+			result[2][1] = futureEval_x3.get();
+			System.out.println("Coefficients = "+Arrays.deepToString(result));
+			ml.eval("yPred = predict(mdl,table(data(:,1),data(:,2),data(:,3),data(:,4),data(:,6)));");
+			ml.eval("plot(data(:,6),data(:,5),'.');");
+			ml.eval("hold on");
+			ml.eval("plot(data(:,6), yPred, '.');");
+			ml.eval("legend('All Data','Predicted Response');");
+			ml.eval("xlabel('Number of House');");
+			ml.eval("ylabel('Population of 80 over');");
+			ml.eval("title('Population of 80 over for house')");
+			ml.eval("pause(5);");
+			ml.eval("saveas(gcf,'stepwise.png')");
+			ml.eval("hold off");
+			Future<double[]> futureEval_y = ml.getVariableAsync("yPred");
+			double [] ypred = futureEval_y.get();
+			
+		} catch (MatlabExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MatlabSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CancellationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (EngineException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	public void getEvaluateFit(double []y, double []ypred, String name) {
 		try {
 			ml.putVariableAsync("y", y);
