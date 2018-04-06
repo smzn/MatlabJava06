@@ -27,6 +27,7 @@ public class MatlabJava06_lib {
 			ml.eval("ylabel('Population of 80 over');");
 			ml.eval("title('Population of 80 over for house')");
 			ml.eval("pause(5);");
+			ml.eval("saveas(gcf,'scatter.png')");
 			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block

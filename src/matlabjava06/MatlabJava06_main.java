@@ -15,12 +15,12 @@ public class MatlabJava06_main {
 		//csv取り込みここまで
 		
 		MatlabJava06_lib mlib = new MatlabJava06_lib(data);
-		double result3[][] = mlib.getStepwise();
-		System.out.println("Stepwiselm = "+Arrays.deepToString(result3));
 		double result[][] = mlib.getRegression();
 		double result2[][] = mlib.getRegression2();
 		System.out.println("Regression = "+Arrays.deepToString(result));
 		System.out.println("Regression2 = "+Arrays.deepToString(result2));
+		double result3[][] = mlib.getStepwise();
+		System.out.println("Stepwiselm = "+Arrays.deepToString(result3));
 	}
 
 }
